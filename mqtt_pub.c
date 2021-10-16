@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
+#include "constants.h"
 
 char *itoa(int val, int base)
 {
@@ -30,33 +30,33 @@ char *generateRandom(const int min, const int max)
 
 char *randomTemperature()
 {
-    int tempIdealMin = 18;
-    int tempIdealMax = 27;
+    int tempIdealMin = SENSOR_TEMP_MIN - 10;
+    int tempIdealMax = SENSOR_TEMP_MAX + 10;
     return generateRandom(tempIdealMin, tempIdealMax);
     ;
 }
 
 char *randomHumidity()
 {
-    int humIdealMin = 40;
-    int humIdealMax = 55;
+    int humIdealMin = SENSOR_HUM_MIN - 10;
+    int humIdealMax = SENSOR_HUM_MAX + 10;
     return generateRandom(humIdealMin, humIdealMax);
 }
 
 int main()
 {
-    int rc;
+    int errorCode;
     struct mosquitto *msqt;
 
     mosquitto_lib_init();
 
     msqt = mosquitto_new("publisher-test", true, NULL);
 
-    rc = mosquitto_connect(msqt, "localhost", 1883, 60);
+    errorCode = mosquitto_connect(msqt, "localhost", 1883, 60);
 
-    if (rc != 0)
+    if (errorCode != 0)
     {
-        printf("Failed to connect to broker! error %d\n", rc);
+        printf("Failed to connect to broker! error %d\n", errorCode);
         mosquitto_destroy(msqt);
         return -1;
     }
@@ -68,12 +68,14 @@ int main()
     for (int count = 0; count < 100; count++)
     {
 
-        sleep(5);
+        sleep(4);
         char *temp = randomTemperature();
-        char *hum = randomHumidity();
 
-        mosquitto_publish(msqt, NULL, "sensor/temperature", 6, temp, 0, false);
-        mosquitto_publish(msqt, NULL, "sensor/humidity", 6, hum, 0, false);
+        mosquitto_publish(msqt, NULL, SENSOR_TOPIC_TEMP, 6, temp, 0, false);
+
+        sleep(1);
+        char *hum = randomHumidity();
+        mosquitto_publish(msqt, NULL, SENSOR_TOPIC_HUM, 6, hum, 0, false);
 
         time_t t = time(NULL);
         struct tm tm = *localtime(&t);
