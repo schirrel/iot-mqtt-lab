@@ -3,16 +3,42 @@
 #include <string.h>
 #include <mosquitto.h>
 #include "constants.h"
+#include <time.h>
 
+int currentTemperature = 25;
+int currentHumidity = 50;
+int airConditionerState = 1; //1 - on | 0 - off
 
 void handleTemperature(char *value)
 {
-    printf("new Temperature %s\n", value);
+    currentTemperature = atoi(value);
 }
 
 void handleHumidity(char *value)
 {
-    printf("new Humidity %s\n", value);
+    currentHumidity = atoi(value);
+}
+
+void validateSensors()
+{
+    int isTempIdeal = currentTemperature > SENSOR_TEMP_MIN && currentTemperature < SENSOR_TEMP_MAX;
+
+    int isHumIdeal = currentHumidity > SENSOR_HUM_MIN && currentHumidity < SENSOR_HUM_MAX;
+
+    int bothIdeal = isTempIdeal && isHumIdeal;
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+
+    if (bothIdeal && !airConditionerState)
+    {
+        printf("Values of Temperature(%d) and Humidity(%d) are inside the threshold, turning Air conditioning on at %d-%02d-%02d %02d:%02d:%02d\n", currentTemperature, currentHumidity, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    }
+    else if (!bothIdeal && airConditionerState)
+    {
+
+        printf("Values of Temperature(%d) and Humidity(%d) exceeds the threshold, turning Air conditioning off at %d-%02d-%02d %02d:%02d:%02d \n", currentTemperature, currentHumidity, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    }
+    airConditionerState = bothIdeal;
 }
 
 void on_connect(struct mosquitto *msqt, void *obj, int errorCode)
@@ -40,6 +66,8 @@ void on_message(struct mosquitto *msqt, void *obj, const struct mosquitto_messag
     {
         handleHumidity((char *)msg->payload);
     }
+
+    validateSensors();
 }
 
 int main()

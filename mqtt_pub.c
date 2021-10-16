@@ -6,6 +6,8 @@
 #include <time.h>
 #include "constants.h"
 
+int offset = 5;
+
 char *itoa(int val, int base)
 {
 
@@ -30,16 +32,16 @@ char *generateRandom(const int min, const int max)
 
 char *randomTemperature()
 {
-    int tempIdealMin = SENSOR_TEMP_MIN - 10;
-    int tempIdealMax = SENSOR_TEMP_MAX + 10;
+    int tempIdealMin = SENSOR_TEMP_MIN - offset;
+    int tempIdealMax = SENSOR_TEMP_MAX + offset;
     return generateRandom(tempIdealMin, tempIdealMax);
     ;
 }
 
 char *randomHumidity()
 {
-    int humIdealMin = SENSOR_HUM_MIN - 10;
-    int humIdealMax = SENSOR_HUM_MAX + 10;
+    int humIdealMin = SENSOR_HUM_MIN - offset;
+    int humIdealMax = SENSOR_HUM_MAX + offset;
     return generateRandom(humIdealMin, humIdealMax);
 }
 

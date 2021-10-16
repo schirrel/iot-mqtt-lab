@@ -1,3 +1,8 @@
+#include <time.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
 char *SENSOR_TOPIC_TEMP = "sensor/temperature";
 char *SENSOR_TOPIC_HUM = "sensor/humidity";
 int SENSOR_TEMP_MIN = 18;
